@@ -10,14 +10,14 @@
     <div id="app">
         <div class="echo">
             <h1>WebSockets Demo</h1>
-            <div class="table">
-                <div class="sent" v-for="item in messages" >
+            <div class="table" v-for="(item, index) in messages">
+                <div class="sent" v-if="item.type == 'sent'">
                     <div class="text1">Sent:</div>
-                    <div class="text2" >{{ item }}</div>
+                    <div class="text2" >{{ item.content }}</div>
                 </div>
-                <div class="recieved">
+                <div class="recieved" v-if="item.type == 'recieved'"  >
                     <div class="text1">Recieved:</div>
-                    <div class="text2">{{ }}</div>
+                    <div class="text2">{{ item.content }}</div>
                 </div>
             </div>
             <textarea name="" id="message" placeholder="Write your message here..." v-model="message"></textarea>
@@ -66,7 +66,7 @@
             font-size: 70%;            
             color: gray;
         }
-        text2 {
+        .text2 {
             width: auto;
         }
         #message {
@@ -101,7 +101,8 @@
                 return {
                     message: "",
                     messages: [],
-                    socket: new WebSocket('ws://localhost:3000')                    
+                    socket: new WebSocket('ws://localhost:3000'),
+                    obj: {}         
                 }
             },
             mounted() {
@@ -112,17 +113,29 @@
                     console.log('Disconnected from Websocket');
                 })
                 this.socket.addEventListener('message', (message) => {
-                    this.messages.push(message.data);
+                    this.obj = {
+                        content: message.data,
+                        type: "recieved"
+                    };
+                    this.messages.push(this.obj);
+                    
+
+                    
+                
                 })
                 this.socket.addEventListener('error', function(error){
                     console.log(error);
                 })
             },
             methods: {
-                echosend: function() {    
+                echosend: function () { 
+                    this.obj = {
+                        content: this.message,
+                        type: "sent"
+                    };
+                    this.messages.push(this.obj);
                     this.socket.send(this.message);
-                    
-                                       
+                                                               
                 }
                 
             }
